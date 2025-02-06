@@ -13,11 +13,11 @@ const app : Express = express();
 app.use(cookieParser());
 app.use(express.json());
 dbConnect();
-// app.use(cors({
-//     credentials:true,
-//     origin:"*",
-//     methods:['GET', 'POST', 'PUT', 'DELETE']
-// }));
+app.use(cors({
+    credentials:true,
+    origin:"*",
+    methods:['GET', 'POST', 'PUT', 'DELETE']
+}));
 export const server  = http.createServer(app);
 
 

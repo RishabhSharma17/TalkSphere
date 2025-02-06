@@ -5,6 +5,7 @@ interface User extends Document {
     email: string;
     password:string;
     rooms:mongoose.Types.ObjectId[];
+    lastReadMessage: Record<string, mongoose.Types.ObjectId>;
 }
 
 interface Room extends Document {
@@ -16,7 +17,7 @@ interface Room extends Document {
 
 interface Messages extends Document {
     content:string;
-    sender_name:mongoose.Types.ObjectId;
+    sender_name:string;
     room_id:mongoose.Types.ObjectId;
 }
 
@@ -44,6 +45,11 @@ const userSchema:Schema<User> = new Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Room",
     }],
+    lastReadMessage:{
+        type:Map,
+        of:mongoose.Schema.Types.ObjectId,
+        default:{}
+    }
 });
 
 const roomSchema:Schema<Room> = new Schema({
@@ -72,10 +78,7 @@ const messageSchema:Schema<Messages> = new Schema({
         type:String,
         required:[true,"Message is required"],
     },
-    sender_name:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
-    },
+    sender_name:String,
     room_id:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Room"

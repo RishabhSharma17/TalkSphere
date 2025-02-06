@@ -108,6 +108,42 @@ roomRouter.post('/joinroom/:roomId',authcheck,async (req:Request, res:Response):
     }
 });
 
+roomRouter.get('/unread-messages/:roomId', authcheck, async (req: Request, res: Response):Promise<void> => {
+    //@ts-ignore
+    const userId = new mongoose.Types.ObjectId(req.user_id);
+    const { roomId } = req.params;
+
+    try {
+        const user = await userModel.findById(userId);
+        const room = await roomModel.findById(roomId).populate('messages');
+
+        if (!user || !room) {
+            res.status(404).json({ message: "User or Room not found", success: false });
+            return;
+        }
+
+        // Ensure lastReadMessage object is initialized
+        if (!user.lastReadMessage[roomId]) {
+            user.lastReadMessage[roomId] = new mongoose.Types.ObjectId(""); // Set empty if never read
+            await user.save();
+        }
+
+        // Count unread messages
+        const lastReadMessageId = user.lastReadMessage[roomId] || "";  // Default to empty if not set
+        const unreadCount = room.messages.filter(msg => msg._id > lastReadMessageId).length;
+
+        res.status(200).json({ success: true, unreadCount });
+        return;
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error", success: false });
+        return;
+    }
+});
+
+
+
 roomRouter.get("/all-info/:roomId",authcheck,async (req:Request, res:Response):Promise<void> => {
     const { roomId } = req.params;
     try {
